@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JULFERIIN VAGA</title>
+<style>
+:root{--maroon:#641d36;--navy:#102744;--light:#eef3f8}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:var(--light);color:#202b3a}
+header{background:linear-gradient(120deg,var(--maroon),var(--navy));color:white;padding:22px 15px;text-align:center}
+header h1{margin:0}
+nav{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:15px}
+button{background:var(--navy);color:white;border:0;padding:11px 14px;border-radius:8px;cursor:pointer;margin:3px}
+button.red{background:var(--maroon)}
+button.light{background:#e7edf4;color:var(--navy)}
+main{max-width:1000px;margin:20px auto;padding:0 12px}
+.card{background:white;padding:18px;border-radius:12px;margin-bottom:15px;box-shadow:0 2px 10px #0000000b}
+h2,h3{color:var(--navy)}
+input,textarea,select{width:100%;padding:11px;margin:5px 0 12px;border:1px solid #ccd4df;border-radius:7px;font:inherit}
+label{font-weight:bold;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.branch{width:100%;height:100%;background:white;color:var(--navy);border:1px solid #ccd4df;text-align:left;padding:17px}
+.branch strong{display:block;font-size:17px;margin-bottom:8px}
+.page{display:none}
+.active{display:block}
+.status{padding:5px 9px;border-radius:6px;background:#fff0c2;display:inline-block}
+.approved{background:#d9f4e3}
+.rejected{background:#ffe1e1}
+.post{border-top:1px solid #ddd;padding:14px 0}
+small{color:#64748b}
+</style>
+</head>
+<body>
+<header>
+<h1>JULFERIIN VAGA</h1>
+<p>Portal de Emprego e Oportunidades</p>
+<nav>
+<button class="light" onclick="page('home')">Início</button>
+<button class="light" onclick="page('account')">Criar conta / Entrar</button>
+<button class="light" onclick="page('profile')">Meu perfil</button>
+<button class="light" onclick="page('social')">Atividades</button>
+<button class="red" onclick="page('adminLogin')">Diretor-Geral</button>
+</nav>
+</header>
+
+<main>
+<section id="home" class="page active">
+<div class="card">
+<h2>Escolha o ramo para se candidatar</h2>
+<p>Crie uma conta antes de enviar a sua candidatura.</p>
+</div>
+<div id="branches" class="grid"></div>
+<div id="areas" class="card" style="display:none"></div>
+</section>
+
+<section id="account" class="page">
+<div class="card">
+<h2>Criar conta ou entrar</h2>
+<label>Nome completo</label>
+<input id="accountName" placeholder="Seu nome completo">
+<label>E-mail</label>
+<input id="accountEmail" type="email" placeholder="seuemail@gmail.com">
+<button onclick="login()">Continuar</button>
+<button class="light" onclick="logout()">Sair</button>
+<p id="accountMsg"></p>
+</div>
+</section>
+
+<section id="apply" class="page">
+<div class="card">
+<h2>Ficha de candidatura</h2>
+<p id="selected"></p>
+<form id="applicationForm">
+<label>Nome completo</label><input id="fullName" required>
+<label>E-mail</label><input id="email" type="email" required>
+<label>Profissão</label><input id="profession" required>
+<label>Morada</label><input id="address" required>
+<label>Número de telefone</label><input id="phone" required>
+<label>Experiência profissional</label><textarea id="experience"></textarea>
+<label>Upload do CV</label><input id="cv" type="file" accept=".pdf,.doc,.docx,image/*">
+<label>Upload dos certificados</label><input id="certificates" type="file" multiple>
+<label>Outros documentos da galeria</label><input id="documents" type="file" multiple>
+<button type="submit">Enviar candidatura</button>
+<button type="button" class="light" onclick="page('home')">Cancelar</button>
+</form>
+<p id="applyMsg"></p>
+<small>Protótipo: os nomes dos anexos são registados, mas os ficheiros ainda não são enviados para um servidor.</small>
+</div>
+</section>
+
+<section id="profile" class="page">
+<div class="card">
+<h2>Meu perfil profissional</h2>
+<label>Nome</label><input id="pname">
+<label>Biografia / profissão</label><textarea id="bio"></textarea>
+<label>Foto de perfil</label><input id="photo" type="file" accept="image/*">
+<div class="grid">
+<div><label>Facebook</label><input id="facebook" placeholder="Link do Facebook"></div>
+<div><label>TikTok</label><input id="tiktok" placeholder="Link do TikTok"></div>
+<div><label>Instagram</label><input id="instagram" placeholder="Link do Instagram"></div>
+<div><label>YouTube</label><input id="youtube" placeholder="Link do YouTube"></div>
+<div><label>LinkedIn</label><input id="linkedin" placeholder="Link do LinkedIn"></div>
+<div><label>WhatsApp</label><input id="whatsapp" placeholder="Link do WhatsApp"></div>
+</div>
+<button onclick="saveProfile()">Guardar perfil</button>
+</div>
+<div class="card"><h2>Minhas candidaturas e notificações</h2><div id="myApps"></div></div>
+</section>
+
+<section id="social" class="page">
+<div class="card">
+<h2>Atividades JULFERIIN</h2>
+<p>Publicações, gostos, comentários e partilhas.</p>
+<div id="composer" style="display:none">
+<textarea id="postText" placeholder="Escreva uma publicação..."></textarea>
+<label>Imagem da galeria</label><input id="postImage" type="file" accept="image/*">
+<button onclick="publish()">Publicar</button>
+</div>
+<div id="feed"></div>
+</div>
+</section>
+
+<section id="adminLogin" class="page">
+<div class="card">
+<h2>Painel do Diretor-Geral</h2>
+<label>E-mail</label>
+<input id="adminEmail" type="email" value="julferiinlda@gmail.com">
+<label>Palavra-passe</label>
+<input id="adminPassword" type="password" placeholder="Password">
+<button onclick="adminLogin()">Entrar no painel</button>
+<p id="adminMsg"></p>
+</div>
+</section>
+
+<section id="admin" class="page">
+<div class="card">
+<h2>Painel do Diretor-Geral</h2>
+<p id="counts"></p>
+<label>Filtrar candidaturas</label>
+<select id="filter" onchange="renderAdmin()">
+<option>Todas</option><option>Pendente</option>
+<option>Aprovada</option><option>Não aprovada</option>
+</select>
+<div id="applications"></div>
+<button class="light" onclick="adminLogout()">Terminar sessão</button>
+</div>
+<div class="card">
+<h2>Publicar atividade da JULFERIIN</h2>
+<textarea id="adminPost" placeholder="Mensagem para os candidatos"></textarea>
+<button onclick="adminPublish()">Publicar</button>
+</div>
+</section>
+</main>
+
+<script>
+const RAMOS=[
+{nome:"JULFERIIN LTD0",areas:["Farmácia","Segurança","Vestuário","Cosméticos","Importação"]},
+{nome:"JULFERIIN LTD1",areas:["Limpeza","Manutenção","Produção de sabão líquido","Reparação de equipamentos eletrónicos"]},
+{nome:"JULFERIIN LTD2",areas:["Aluguer de viaturas","Exportação e importação"]},
+{nome:"JULFERIIN LTD3",areas:["Comida","Cozinha","Mercearia"]},
+{nome:"JULFERIIN LTD4",areas:["Agricultura","Agropecuária","Jardinagem","Pulverização"]}
+];
+
+const read=k=>JSON.parse(localStorage.getItem("jv_"+k)||"[]");
+const write=(k,v)=>localStorage.setItem("jv_"+k,JSON.stringify(v));
+const readObj=k=>JSON.parse(localStorage.getItem("jv_"+k)||"{}");
+const writeObj=(k,v)=>localStorage.setItem("jv_"+k,JSON.stringify(v));
+let user=localStorage.getItem("jv_user")||"";
+let chosenBranch="",chosenArea="",isAdmin=false;
+
+function page(id){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ if(id==="profile")renderProfile();
+ if(id==="social")renderFeed();
+ if(id==="admin")renderAdmin();
+ window.scrollTo(0,0);
+}
+
+function esc(s){
+ return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function renderBranches(){
+ const root=document.getElementById("branches");
+ root.innerHTML="";
+ RAMOS.forEach(r=>{
+  const b=document.createElement("button");
+  b.className="branch";
+  b.innerHTML="<strong>"+esc(r.nome)+"</strong>"+esc(r.areas.join(" · "))+"<p>Ver áreas →</p>";
+  b.onclick=()=>showAreas(r);
+  root.appendChild(b);
+ });
+}
+
+function showAreas(r){
+ const box=document.getElementById("areas");
+ box.style.display="block";
+ box.innerHTML="<h2>"+esc(r.nome)+" — Escolha uma área</h2>";
+ r.areas.forEach(a=>{
+  const b=document.createElement("button");
+  b.textContent=a;
+  b.onclick=()=>{
+   if(!user){alert("Crie uma conta ou entre primeiro.");page("account");return}
+   chosenBranch=r.nome;chosenArea=a;
+   document.getElementById("selected").textContent=r.nome+" / "+a;
+   document.getElementById("fullName").value=readObj("users")[user]?.name||"";
+   document.getElementById("email").value=user;
+   page("apply");
+  };
+  box.appendChild(b);
+ });
+ const back=document.createElement("button");
+ back.className="light";back.textContent="Voltar aos ramos";
+ back.onclick=()=>box.style.display="none";
+ box.appendChild(back);
+}
+
+function login(){
+ const name=document.getElementById("accountName").value.trim();
+ const email=document.getElementById("accountEmail").value.trim().toLowerCase();
+ if(!email.includes("@")){accountMsg.textContent="Introduza um e-mail válido.";return}
+ const users=readObj("users");
+ if(!users[email]&&!name){accountMsg.textContent="Escreva o nome para criar a conta.";return}
+ if(!users[email])users[email]={name:name,email:email,profile:{}};
+ writeObj("users",users);
+ user=email;localStorage.setItem("jv_user",user);
+ accountMsg.textContent="Conta aberta neste dispositivo.";
+}
+function logout(){user="";localStorage.removeItem("jv_user");accountMsg.textContent="Sessão terminada."}
+
+document.getElementById("applicationForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ if(!user){alert("Entre primeiro.");return}
+ const files=id=>Array.from(document.getElementById(id).files).map(f=>f.name);
+ const apps=read("apps");
+ apps.unshift({
+ id:"JV"+Date.now(),user:user,
+ name:fullName.value,email:email.value,
+ profession:profession.value,address:address.value,
+ phone:phone.value,experience:experience.value,
+ branch:chosenBranch,area:chosenArea,status:"Pendente",
+ message:"",date:new Date().toLocaleString(),
+ cv:files("cv"),certificates:files("certificates"),
+ documents:files("documents")
+ });
+ write("apps",apps);
+ applyMsg.textContent="Candidatura registada. Estado: Pendente.";
+ e.target.reset();
+});
+
+function saveProfile(){
+ if(!user){alert("Entre primeiro.");return}
+ const users=readObj("users"),u=users[user]||{name:user};
+ u.name=pname.value;u.profile={
+ bio:bio.value,facebook:facebook.value,tiktok:tiktok.value,
+ instagram:instagram.value,youtube:youtube.value,
+ linkedin:linkedin.value,whatsapp:whatsapp.value,
+ photoName:photo.files[0]?.name||""
+ };
+ users[user]=u;writeObj("users",users);
+ alert("Perfil guardado neste dispositivo.");
+}
+function renderProfile(){
+ if(!user){myApps.innerHTML="Entre para ver o seu perfil.";return}
+ const u=readObj("users")[user]||{name:user,profile:{}};
+ pname.value=u.name||"";
+ bio.value=u.profile?.bio||"";
+ ["facebook","tiktok","instagram","youtube","linkedin","whatsapp"].forEach(k=>document.getElementById(k).value=u.profile?.[k]||"");
+ myApps.innerHTML=read("apps").filter(a=>a.user===user).map(a=>
+ "<div class='post'><b>"+esc(a.branch)+" — "+esc(a.area)+"</b><p>"+esc(a.profession)+"</p><span class='status'>"+esc(a.status)+"</span><p>"+esc(a.message)+"</p></div>"
+ ).join("")||"Ainda não enviou candidaturas.";
+}
+
+function adminLogin(){
+ if(adminEmail.value.trim().toLowerCase()==="julferiinlda@gmail.com"&&adminPassword.value==="123456"){
+ isAdmin=true;page("admin");
+ }else adminMsg.textContent="Dados de acesso incorretos.";
+}
+function adminLogout(){isAdmin=false;page("home")}
+
+function renderAdmin(){
+ if(!isAdmin){page("adminLogin");return}
+ const apps=read("apps");
+ counts.textContent="Total: "+apps.length+" | Pendentes: "+apps.filter(a=>a.status==="Pendente").length+" | Aprovadas: "+apps.filter(a=>a.status==="Aprovada").length+" | Não aprovadas: "+apps.filter(a=>a.status==="Não aprovada").length;
+ const f=filter.value;
+ applications.innerHTML=apps.filter(a=>f==="Todas"||a.status===f).map(a=>
+ `<div class="post">
+ <h3>${esc(a.name)}</h3>
+ <p>${esc(a.branch)} — ${esc(a.area)}</p>
+ <p>E-mail: ${esc(a.email)} | Telefone: ${esc(a.phone)}</p>
+ <p>Profissão: ${esc(a.profession)} | Morada: ${esc(a.address)}</p>
+ <p>CV: ${esc((a.cv||[]).join(", "))}</p>
+ <p>Certificados: ${esc((a.certificates||[]).join(", "))}</p>
+ <p>Outros documentos: ${esc((a.documents||[]).join(", "))}</p>
+ <p>Estado: <b>${esc(a.status)}</b></p>
+ <label>Mensagem para o candidato</label>
+ <textarea id="msg_${a.id}">${esc(a.message)}</textarea>
+ <button onclick="decide('${a.id}','Aprovada')">Aprovar</button>
+ <button class="red" onclick="decide('${a.id}','Não aprovada')">Não aprovar</button>
+ <button class="light" onclick="decide('${a.id}','Pendente')">Pendente</button>
+ </div>`).join("")||"Nenhuma candidatura encontrada.";
+}
+
+function decide(id,status){
+ const apps=read("apps"),a=apps.find(x=>x.id===id);
+ if(!a)return;
+ a.status=status;
+ a.message=document.getElementById("msg_"+id).value;
+ a.notificationDate=new Date().toLocaleString();
+ write("apps",apps);renderAdmin();
+ alert("Decisão guardada. O envio de e-mail real ainda precisa de ser configurado.");
+}
+
+function renderFeed(){
+ composer.style.display=user?"block":"none";
+ feed.innerHTML=read("posts").map(p=>
+ `<div class="post"><b>${esc(p.author)}</b><p>${esc(p.text)}</p>
+ <small>${esc(p.date)}</small><br>
+ <button class="light" onclick="likePost('${p.id}')">♥ Gostar (${p.likes||0})</button>
+ <button class="light" onclick="commentPost('${p.id}')">Comentar</button>
+ <button class="light" onclick="sharePost('${p.id}')">Partilhar</button>
+ ${(p.comments||[]).map(c=>"<p>"+esc(c.user)+": "+esc(c.text)+"</p>").join("")}
+ </div>`).join("")||"Ainda não existem publicações.";
+}
+function publish(){
+ if(!user)return;
+ const posts=read("posts");
+ posts.unshift({id:"P"+Date.now(),author:user,text:postText.value,
+ imageName:postImage.files[0]?.name||"",date:new Date().toLocaleString(),likes:0,comments:[]});
+ write("posts",posts);postText.value="";postImage.value="";renderFeed();
+}
+function adminPublish(){
+ if(!isAdmin)return;
+ const posts=read("posts");
+ posts.unshift({id:"P"+Date.now(),author:"JULFERIIN",text:adminPost.value,
+ date:new Date().toLocaleString(),likes:0,comments:[]});
+ write("posts",posts);adminPost.value="";alert("Publicação guardada."); 
+}
+function likePost(id){
+ if(!user){alert("Entre primeiro.");return}
+ const posts=read("posts"),p=posts.find(x=>x.id===id);
+ if(p)p.likes=(p.likes||0)+1;
+ write("posts",posts);renderFeed();
+}
+function commentPost(id){
+ if(!user){alert("Entre primeiro.");return}
+ const t=prompt("Escreva o comentário:");
+ if(!t)return;
+ const posts=read("posts"),p=posts.find(x=>x.id===id);
+ if(p){p.comments.push({user:user,text:t});write("posts",posts)}
+ renderFeed();
+}
+function sharePost(id){
+ const p=read("posts").find(x=>x.id===id);
+ if(p&&navigator.share)navigator.share({title:"JULFERIIN VAGA",text:p.text});
+ else if(p)alert(p.text);
+}
+renderBranches();
+</script>
+</body>
+</html>
